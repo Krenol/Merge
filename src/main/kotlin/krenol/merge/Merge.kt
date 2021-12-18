@@ -1,55 +1,40 @@
 package krenol.merge
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import krenol.merge.data.Range
-import krenol.merge.data.RangeList
-import krenol.merge.parsers.RangeListParser
+import krenol.merge.parsers.InputStringParser
+import krenol.merge.parsers.ListOfRangesParser
 import krenol.merge.validators.InputValidator
 
-class Merge(rangeStr: String?) {
-    private val listOfRanges: MutableList<Range<Int>>
-    private lateinit var mergedListOfRanges: List<Range<Int>>
+class Merge {
+    private val inputValidator = InputValidator()
+    private val inputStringParser = InputStringParser()
+    private val listOfRangesParser = ListOfRangesParser<Int>()
+    private val rangeListMerger = RangeListMerger<Int>()
 
-    init {
-        validateInput(rangeStr)
-        listOfRanges = parseListOfRanges(rangeStr)
-        sortListOfRanges()
+    fun mergeListOfRanges(rangeString: String?) : List<Range<Int>> {
+        validateInput(rangeString)
+        val listOfRanges = parseListOfRanges(rangeString)
+        sortListOfRangesAscending(listOfRanges)
+        return mergeRanges(listOfRanges)
     }
 
-    private fun validateInput(rangeStr: String?) {
-        val inputValidator = InputValidator()
-        val valid = inputValidator.isValidInputString(rangeStr)
+    private fun validateInput(rangeString: String?) {
+        val valid = inputValidator.isValidInputString(rangeString)
         if(valid != true) {
             throw Exception("Invalid input detected! Input must be of form [1,2] [2,4]")
         }
     }
 
-    private fun parseListOfRanges(rangeStr: String?) : MutableList<Range<Int>> {
-        val rangeListParser = RangeListParser<Int>()
-        val jsonStr = parseInputStringToJsonString(rangeStr)
-        val arrayList = Json.decodeFromString<RangeList<Int>>(jsonStr)
-        return rangeListParser.parseInputListToRangeObjectList(arrayList)
+    private fun parseListOfRanges(rangeString: String?) : MutableList<Range<Int>> {
+        val mergeInputList = inputStringParser.parseInputStringToMergeInputList(rangeString)
+        return listOfRangesParser.parseMergeInputListToListOfRanges(mergeInputList)
     }
 
-    private fun parseInputStringToJsonString(rangeStr: String?): String {
-        return "{\"list\": [${rangeStr?.replace(' ', ',')}]}"
-    }
-
-    private fun sortListOfRanges() {
+    private fun sortListOfRangesAscending(listOfRanges: MutableList<Range<Int>>) {
         listOfRanges.sortBy { it.minValue }
     }
 
-    fun mergeListOfRanges() {
-        val rangeListMerger = RangeListMerger<Int>()
-        mergedListOfRanges = rangeListMerger.mergeListOfRanges(listOfRanges)
-    }
-
-    fun printMergeResult() {
-        var listString = mergedListOfRanges.toString()
-        listString = listString.replace("],", "]")
-        listString = listString.drop(1)
-        listString = listString.dropLast(1)
-        println(listString)
+    private fun mergeRanges(listOfRanges: MutableList<Range<Int>>): List<Range<Int>>{
+        return rangeListMerger.mergeListOfRanges(listOfRanges)
     }
 }
