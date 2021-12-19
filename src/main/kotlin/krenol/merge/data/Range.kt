@@ -28,9 +28,6 @@ class Range<T : Comparable<T>>(private var firstValue: T, private var secondValu
     }
 
     fun mergeRange(rangeToMerge: Range<T>) {
-        if(!valueIsInRange(rangeToMerge.minValue) && !valueIsInRange(rangeToMerge.maxValue)) {
-            throw Exception("Cannot merge ranges with values ${this.toString()} and ${rangeToMerge.toString()}")
-        }
         if(rangeToMerge.minValue < minValue) {
             minValue = rangeToMerge.minValue
         }

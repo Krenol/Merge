@@ -21,7 +21,7 @@ class Merge {
     private fun validateInput(rangeString: String?) {
         val valid = inputValidator.isValidInputString(rangeString)
         if(valid != true) {
-            throw Exception("Invalid input detected! Input must be of form [1,2] [2,4]")
+            throw Exception("Invalid input detected! Input must be of form [1,2] [2,4] and must only contain Integers")
         }
     }
 
